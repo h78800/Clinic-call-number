@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8"> <!-- 設置文件的字符編碼為UTF-8，以支援中文和其他多位元組字符 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- 確保網頁在移動設備上正確顯示 -->
+    <title>診間叫號系統_鍵盤輸入</title>
+    <style>
+        /* 重置body和html的預設邊距和填充，設置高度為100%以便填滿視口 */
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif; /* 使用Arial字體作為預設字體 */
+        }
+
+        /* 使用flexbox布局以便於控制頁面布局 */
+        .container {
+            display: flex;
+            height: 100vh; /* 100vh表示視口高度的100% */
+        }
+
+        /* 影片容器佔據80%寬度，內容居中 */
+        .video-container {
+            width: 80%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 消息容器佔據20%寬度，採用列布局 */
+        .message-container {
+            width: 20%;
+            background: #f0f0f0; /* 設置背景色 */
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box; /* 包含padding在寬度計算內 */
+        }
+
+        /* 上半部分和下半部分各佔一半高度 */
+        .upper-half,
+        .lower-half {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 上半部分與下半部分之間添加邊框 */
+        .upper-half {
+            border-bottom: 1px solid #ddd;
+        }
+
+        /* 影片元素最大寬高限制 */
+        video {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        /* 標題樣式 */
+        h2 {
+            font-size: 2em;
+            margin: 0 0 10px;
+            color: #333;
+        }
+
+        /* 顯示當前號碼的樣式，大字體以突出顯示 */
+        .number-display {
+            font-size: 8em;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #2c3e50;
+        }
+
+        /* 控制面板的布局 */
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            align-items: center;
+        }
+
+        /* 控制按鈕的布局 */
+        .control-buttons {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        /* 按鈕寬度設置 */
+        .control-buttons button {
+            width: 45%;
+        }
+
+        /* 統一按鈕和輸入框的樣式 */
+        button,
+        input {
+            font-size: 1.5em;
+            margin: 5px 0;
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            background-color: #ecf0f1;
+            color: #2c3e50;
+        }
+
+        /* 輸入框居中對齊 */
+        input[type="number"] {
+            text-align: center;
+        }
+
+        /* 懸停效果 */
+        button:hover,
+        input:hover {
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* 閃爍效果的類 */
+        .blink {
+            animation: blinkingText 1s linear 3;
+        }
+
+        /* 定義閃爍動畫 #ec07c6 #2c3e50*/
+        @keyframes blinkingText {
+            0% {
+                color: #2c3e50;
+            }
+
+            50% {
+                color: transparent;
+            }
+
+            100% {
+                color: #ec07c6;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="video-container">
+            <video controls>
+                <source src="你的mp4檔案路徑.mp4" type="video/mp4">
+                你的瀏覽器不支援此影片格式。
+            </video>
+        </div>
+        <div class="message-container">
+            <div class="upper-half">
+                <h2>診間叫號</h2>
+                <div class="number-display" id="currentNumber">0</div>
+            </div>
+            <div class="lower-half">
+                <div class="control-panel">
+                    <div class="control-buttons">
+                        <!-- 增加號碼的按鈕 -->
+                        <button id="incrementBtn" onclick="changeNumber(1)">+</button>
+                        <!-- 減少號碼的按鈕 -->
+                        <button id="decrementBtn" onclick="changeNumber(-1)">-</button>
+                    </div>
+                    <!-- 重設號碼的按鈕 -->
+                    <button id="resetBtn" onclick="resetNumber()">重設</button>
+                    <!-- 自定義號碼的輸入框 -->
+                    <input type="number" id="customNumber" min="0" value="0">
+                    <!-- 應用自定義號碼的按鈕 -->
+                    <button id="setBtn" onclick="setNumber()">設置</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化當前號碼為0
+        let currentNumber = 0;
+        // 創建一個Audio對象來播放音效
+        let audio = new Audio('C:\\Users\\sf889\\Desktop\\新增資料夾\\push_bell_b.mp3'); // 替換成你的音效文件路徑
+
+        // 更新顯示的函數
+        function updateDisplay() {
+            const numberDisplay = document.getElementById('currentNumber');
+            // 應用閃爍效果
+            numberDisplay.classList.add('blink');
+            numberDisplay.textContent = currentNumber;
+
+            // 確保音效完全播放後再進行語音報告
+            audio.play().then(() => {
+                audio.onended = () => {
+                    // 創建語音合成對象並播放語音
+                    const utterance = new SpeechSynthesisUtterance(`目前看診號碼是 ${currentNumber}號`);
+                    utterance.lang = 'zh-TW';
+                    speechSynthesis.speak(utterance);
+                };
+            }).catch(error => {
+                console.error('音效播放錯誤:', error);
+                // 如果音效播放失敗，直接進行語音報告
+                const utterance = new SpeechSynthesisUtterance(`目前看診號碼是 ${currentNumber}號`);
+                utterance.lang = 'zh-TW';
+                speechSynthesis.speak(utterance);
+            });
+
+            // 3秒後移除閃爍效果
+            setTimeout(() => {
+                numberDisplay.classList.remove('blink');
+            }, 3000); // 閃爍效果持續3秒
+        }
+
+        // 修改號碼的函數
+        function changeNumber(amount) {
+            currentNumber = Math.max(0, currentNumber + amount); // 確保號碼不小於0
+            updateDisplay();
+        }
+
+        // 重設號碼的函數
+        function resetNumber() {
+            currentNumber = 0;
+            updateDisplay();
+        }
+
+        // 設置自定義號碼的函數
+        function setNumber() {
+            let customValue = parseInt(document.getElementById('customNumber').value) || 0; // 如果輸入無效，默認為0
+            currentNumber = Math.max(0, customValue);
+            updateDisplay();
+        }
+
+        // 添加鍵盤事件以便鍵盤操作
+        document.addEventListener('keydown', function(event) {
+            switch(event.key) {
+                case 'ArrowUp':
+                case '+':       //ArrowUp 或 + 鍵增加號碼。
+                    document.getElementById('incrementBtn').click();
+                    break;
+                case 'ArrowDown':
+                case '-':       //ArrowDown 或 - 鍵減少號碼。
+                    document.getElementById('decrementBtn').click();
+                    break;
+                case 'r':
+                case 'R':       // R 鍵重設號碼大小寫都支援
+                    document.getElementById('resetBtn').click();
+                    break;
+                case 'Enter':   //Enter 鍵設置號碼。
+                    document.getElementById('setBtn').click();
+                    break;
+            }
+        });
+
+        // 頁面加載時初始化顯示
+        document.addEventListener('DOMContentLoaded', updateDisplay);
+    </script>
+</body>
+
+</html>
