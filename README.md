@@ -1,2 +1,3 @@
-https://h78800.github.io/Clinic-call-number/Clinic%20call%20number_yt.html
-mp3音效素材下載網址:https://pixabay.com/sound-effects/search/school-bell/
+#使用Markdown README.md 文件編輯說明
+# 診間叫號系統
+這是一個診間叫號系統，旨在通過網頁界面來管理和顯示診間叫號信息。
